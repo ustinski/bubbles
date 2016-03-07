@@ -8,12 +8,13 @@ class Vector
 public:
     Vector(GLfloat x = 0, GLfloat y = 0);
 
-    GLfloat &x;
-    GLfloat &y;
+    GLfloat x() const;
+    GLfloat y() const;
 
-    float length();
-
-    GLfloat *data() { return coord; }
+    void setValues(GLfloat x, GLfloat y);
+    float length() const;
+    float lengthSquare() const;
+    const GLfloat *data() const;
 
     void operator +=(const Vector &vector);
     void operator -=(const Vector &vector);

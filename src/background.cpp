@@ -1,14 +1,15 @@
 #include "background.h"
 #include "app.h"
-#include "matrix.h"
-#include "color.h"
 
 #include <iostream>
 #include <sstream>
 
 using namespace std;
 
-Background::Background() : time(0), changeColor(false)
+Background::Background()
+    : _textureSize(64)
+    , time(0)
+    , changeColor(false)
 {
     GLfloat w = App::width() / 2;
     GLfloat h = App::height() / 2;
@@ -29,12 +30,8 @@ Background::Background() : time(0), changeColor(false)
 
 void Background::createProgram()
 {
-    program = new Program();
-    
     stringstream vertex;
     vertex <<   "precision mediump float;"
-                ""
-                "uniform mat4 mvp;"
                 ""
                 "attribute vec2 a_position;"
                 ""
@@ -43,7 +40,7 @@ void Background::createProgram()
                 "void main()"
                 "{"
                 ""
-                "    gl_Position = mvp * vec4(a_position, 0, 1);"
+                "    gl_Position = vec4(a_position * 2.0 / vec2(" << App::width() << ", " << App::height() << "), 0, 1);"
                 ""
                 "    v_position = a_position;"
                 "}";
@@ -56,11 +53,11 @@ void Background::createProgram()
                 ""
                 "void main()"
                 "{"
-                "    gl_FragColor = texture2D(u_background, vec2(v_position.x / " << App::width() << ".0, v_position.y / " << App::height() << ".0) + vec2(0.5));"
+                "    gl_FragColor = texture2D(u_background, v_position / " << _textureSize << ".0 + vec2(0.5));"
                 "}";
-    program->setShaders(vertex, fragment);
+    program.setShaders(vertex, fragment);
 
-    program->addAttribute("a_position", 2, 2, 0);
+    program.addAttribute("a_position", 2, 2, 0);
 }
 
 void Background::initColors()
@@ -79,42 +76,37 @@ void Background::initColors()
 
 void Background::createTexture()
 {
-    unsigned char *pixels = new unsigned char[App::height() * App::width() * 4];
-    for(int i = 0; i < App::height(); i++) {
-        for(int j = 0; j < App::width(); j++)
-            pixels[(App::width() * i + j) * 4 + 3] = 255;
-    }
-    background = new Texture(0, program, "u_background", App::width(), App::height(), pixels);
+    unsigned char *pixels = new unsigned char[_textureSize * _textureSize * 4];
+    for(int i = 0; i < _textureSize; i++) for(int j = 0; j < _textureSize; j++)
+            pixels[(_textureSize * i + j) * 4 + 3] = 255;
+    _texture = new Texture(0, &program, "u_background", _textureSize, _textureSize, pixels);
     fill(colors.current());
 }
 
 void Background::fill(const ColorPair &pair)
 {
-    for(int i = 0; i < App::height(); i++) {
+    for(int i = 0; i < _textureSize; i++) {
         const int lineSize = 32;
-        const Color &c = i % (lineSize * 2) > lineSize ? pair.a : pair.b;
-        for(int j = 0; j < App::width(); j++) {
-            unsigned char *p = &background->pixels[(App::width() * i + j) * 4];
+        const Color &c = i % _textureSize >= _textureSize / 2 ? pair.a : pair.b;
+        for(int j = 0; j < _textureSize; j++) {
+            unsigned char *p = &_texture->pixels[(_textureSize * i + j) * 4];
             p[0] = c.r;
             p[1] = c.g;
             p[2] = c.b;
         }
     }
-    glBindTexture(GL_TEXTURE_2D, background->index);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, App::width(), App::height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, background->pixels);
+    glBindTexture(GL_TEXTURE_2D, _texture->index);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _textureSize, _textureSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, _texture->pixels);
 }
 
 void Background::draw()
 {
-    program->use();
-    program->enableAttributes(vertexData);
-
-    GLuint mvp = glGetUniformLocation(program->index(), "mvp");
-    glUniformMatrix4fv(mvp, 1, GL_FALSE, App::projection().data());
+    program.use();
+    program.enableAttributes(vertexData);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, background->index);
-    glUniform1i(glGetUniformLocation(program->index(), "u_background"), 0);
+    glBindTexture(GL_TEXTURE_2D, _texture->index);
+    glUniform1i(glGetUniformLocation(program.index(), "u_background"), 0);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
@@ -151,4 +143,14 @@ void Background::update(int dt)
     Color b(c.b.r * k1 + n.b.r * k2, c.b.g * k1 + n.b.g * k2, c.b.b * k1 + n.b.b * k2);
 
     fill({a, b});
+}
+
+Texture Background::texture() const
+{
+    return *_texture;
+}
+
+int Background::textureSize() const
+{
+    return _textureSize;
 }

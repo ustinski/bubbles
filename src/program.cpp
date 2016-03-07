@@ -1,5 +1,4 @@
 #include "program.h"
-#include "app.h"
 
 #include <stdlib.h>
 #include <iostream>
@@ -20,6 +19,11 @@ void Program::setShaders(const GLchar *vertex, const GLchar *fragment)
 void Program::setShaders(const stringstream &vertex, const stringstream &fragment)
 {
     setShaders(vertex.str().c_str(), fragment.str().c_str());
+}
+
+void Program::use()
+{
+    glUseProgram(_index);
 }
 
 void Program::loadShader(GLenum type, const GLchar *shaderSrc)
@@ -55,4 +59,9 @@ void Program::enableAttributes(const void *pointer)
         glVertexAttribPointer(a.index, a.size, GL_FLOAT, GL_FALSE, a.stride, pointer + a.offset);
         glEnableVertexAttribArray(a.index);
     }
+}
+
+GLuint Program::index()
+{
+    return _index;
 }

@@ -1,14 +1,14 @@
 #ifndef APP_H
 #define APP_H
 
-class Matrix;
+class Background;
 
 namespace App
 {
     int width();
     int height();
 
-    const Matrix &projection();
+    const Background &background();
 }
 
 #endif // APP_H

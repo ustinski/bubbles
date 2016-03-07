@@ -25,10 +25,10 @@ public:
 
     void setShaders(const GLchar *vertex, const GLchar *fragment);
     void setShaders(const stringstream &vertex, const stringstream &fragment);
-    void use() { glUseProgram(_index); }
+    void use();
     void addAttribute(const string &name, GLuint size, GLsizei stride, int offset);
     void enableAttributes(const void *pointer);
-    GLuint index() { return _index; }
+    GLuint index();
 
 private:
     GLuint _index;

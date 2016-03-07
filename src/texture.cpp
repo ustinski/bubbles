@@ -1,9 +1,10 @@
 #include "texture.h"
 #include "program.h"
 
-Texture::Texture(int num, Program *program, const char *uniform, int width, int height, unsigned char *pixels)
+Texture::Texture(int number, Program *program, const char *uniform, int width, int height, unsigned char *pixels)
 {
-    glActiveTexture(GL_TEXTURE0 + num);
+    this->number = number;
+    glActiveTexture(GL_TEXTURE0 + number);
     glGenTextures(1, &index);
     glBindTexture(GL_TEXTURE_2D, index);
     glUniform1i(glGetUniformLocation(program->index(), uniform), 0);
@@ -13,4 +14,10 @@ Texture::Texture(int num, Program *program, const char *uniform, int width, int 
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+}
+
+void Texture::bind()
+{
+    glActiveTexture(GL_TEXTURE0 + number);
+    glBindTexture(GL_TEXTURE_2D, index);
 }

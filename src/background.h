@@ -3,7 +3,13 @@
 
 #include "program.h"
 #include "texture.h"
-#include "color.h"
+
+struct Color
+{
+    Color(unsigned char rr, unsigned char gg, unsigned char bb) : r(rr), g(gg), b(bb) {}
+
+    unsigned char r, g, b;
+};
 
 struct ColorPair
 {
@@ -30,18 +36,20 @@ public:
     void draw();
     void update(int dt);
 
-    GLuint textureIndex() const { return background->index; }
+    Texture texture() const;
+    int textureSize() const;
 
 private:
     GLfloat *vertexData;
-
-    Texture *background;
+    Texture *_texture;
+    const int _textureSize;
+    Program program;
 
     ColorContainer colors;
     int time;
     bool changeColor;
 
-    Program *program;
+
     void createProgram();
     void initColors();
     void createTexture();

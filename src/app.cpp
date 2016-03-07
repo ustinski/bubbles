@@ -1,6 +1,6 @@
 #include "app.h"
-#include "matrix.h"
 #include "background.h"
+#include "bubble.h"
 
 #include "../sgm/app.h"
 
@@ -11,9 +11,10 @@ namespace App
     int _width;
     int _height;
 
-    Matrix *_projection;
-
     Background *_background;
+    Bubble *bubble;
+    Bubble *b1;
+
 
     void initGL();
 }
@@ -22,12 +23,14 @@ void App::init(int width, int height)
 {
     _width = width;
     _height = height;
-
-    _projection = new Matrix(float(2) / _width, float(2) / _height, 1, 1);
     
     initGL();
 
     _background = new Background;
+    Bubble::initCommon();
+    b1 = new Bubble(100);
+    bubble = new Bubble(120);
+
 }
 
 void App::initGL()
@@ -44,16 +47,30 @@ void App::tick(unsigned int dt)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     _background->draw();
+    bubble->draw();
+    b1->draw();
 
 
-    //_background->update(dt);
+    _background->update(15);
+    bubble->update(15);
+    b1->update(15);
 }
 
 void App::close()
 {
 }
 
-const Matrix &App::projection() { return *_projection; }
+int App::width()
+{
+    return _width;
+}
 
-int App::width() { return _width; }
-int App::height() { return _height; }
+int App::height()
+{
+    return _height;
+}
+
+const Background &App::background()
+{
+    return *_background;
+}

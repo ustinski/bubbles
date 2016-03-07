@@ -5,13 +5,15 @@
 
 class Program;
 
-class Texture
+struct Texture
 {
-public:
-    Texture(int num, Program *program, const char *uniform, int width, int height, unsigned char *pixels);
+    Texture(int number, Program *program, const char *uniform, int width, int height, unsigned char *pixels);
 
-    unsigned char *pixels;
+    void bind();
+
+    int number;
     GLuint index;
+    unsigned char *pixels;
 };
 
 #endif // TEXTURE_H
