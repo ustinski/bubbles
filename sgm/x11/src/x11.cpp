@@ -5,16 +5,31 @@
 #include <X11/Xlib.h>
 #include <EGL/egl.h>
 
+
+
+#include <sys/time.h>
+
+
+
+int _time;
+
+int _get_time()
+{
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    return (int)(now.tv_sec * 1000 + now.tv_usec / 1000);
+}
+
 namespace X11
-{   
+{
     const char *name = "bubbles-x11";
-    
+
     const int width = 480;
     const int height = 640;
-    
+
     const int x = 0;
     const int y = 0;
-    
+
     Display *x_display;
     Window window;
     EGLSurface egl_surface;
@@ -158,11 +173,14 @@ void X11::init()
 
 void X11::mainLoop()
 {
+    _time = _get_time();
     for(;;) {
         XEvent event;
+        
+        int time = _get_time();
+        int dt = time - _time;
         while(XPending(x_display)) {
             XNextEvent(x_display, &event);
-
             /*switch (event.type) {
                 case ConfigureNotify:
                     reshape(event.xconfigure.width, event.xconfigure.height);
@@ -197,11 +215,27 @@ void X11::mainLoop()
             switch(event.type) {
             case ClientMessage:
                 return;
+            case ButtonPress:
+                if (event.xbutton.button == Button1) {
+                    App::pointerDown(0, event.xbutton.x, event.xbutton.y);
+                }
+                break;
+            case ButtonRelease:
+                if (event.xbutton.button == Button1) {
+                    App::pointerUp(0, event.xbutton.x, event.xbutton.y);
+                }
+                break;
+            case MotionNotify:
+                App::pointerMove(0, event.xbutton.x, event.xbutton.y);
+                break;
             }
         }
 
-        App::tick(123456);
-        eglSwapBuffers(egl_display, egl_surface);
+        if (dt > 16) {
+            App::update(dt);
+            _time = time;
+            eglSwapBuffers(egl_display, egl_surface);
+        }
     }
 }
 

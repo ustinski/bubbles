@@ -21,15 +21,19 @@ namespace App
 
 void App::init(int width, int height)
 {
+    static bool a = false;
+    if(a) return;
+    else a = true;
+    
     _width = width;
     _height = height;
     
     initGL();
 
     _background = new Background;
-    Bubble::initCommon();
-    b1 = new Bubble(100);
-    bubble = new Bubble(120);
+     Bubble::initCommon();
+     b1 = new Bubble(100);
+     bubble = new Bubble(120);
 
 }
 
@@ -42,13 +46,13 @@ void App::initGL()
     glViewport(0, 0, _width, _height);
 }
 
-void App::tick(unsigned int dt)
+void App::update(int dt)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     _background->draw();
-    bubble->draw();
-    b1->draw();
+     bubble->draw();
+     b1->draw();
 
 
     _background->update(15);
@@ -73,4 +77,20 @@ int App::height()
 const Background &App::background()
 {
     return *_background;
+}
+
+
+void App::pointerDown(int id, int x, int y)
+{
+
+}
+
+void App::pointerUp(int id, int x, int y)
+{
+
+}
+
+void App::pointerMove(int id, int x, int y)
+{
+
 }

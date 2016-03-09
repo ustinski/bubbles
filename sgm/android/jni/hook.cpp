@@ -23,5 +23,20 @@ void hook_draw_frame()
     unsigned int time = _get_time();
     unsigned int dt = time - _time;
     _time = time;
-    App::tick(dt);
+    App::update(dt);
+}
+
+void hook_pointer_down(int id, int x, int y)
+{
+    App::pointerDown(id, x, y);
+}
+
+void hook_pointer_up(int id, int x, int y)
+{
+    App::pointerUp(id, x, y);
+}
+
+void hook_pointer_move(int id, int x, int y)
+{
+    App::pointerMove(id, x, y);
 }

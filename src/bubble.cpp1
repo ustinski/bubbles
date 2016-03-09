@@ -45,8 +45,7 @@ void Bubble::createProgram()
 {
     program = new Program;
     stringstream vertex;
-    vertex <<   "#version 100 \n"
-                "precision mediump float;"
+    vertex <<   "precision mediump float;"
                 ""
                 "uniform vec2 u_position;"
                 ""
@@ -61,8 +60,7 @@ void Bubble::createProgram()
                 "   gl_Position = vec4((u_position + a_position) * 2.0 / vec2(" << App::width() << ", " << App::height() << "), 0, 1);"
                 "}";
     stringstream fragment;
-    fragment << "#version 100 \n"
-                "precision mediump float;"
+    fragment << "precision mediump float;"
                 ""
                 "uniform vec2 u_position;"
                 "uniform sampler2D u_background;"
@@ -91,7 +89,7 @@ void Bubble::createProgram()
                 ""
                 "   float n = 1.8;"
                 "   int sc = " << refractionScale << ";"
-                ""
+//                 ""
                 "   vec4 refracted_background = vec4(0);"
                 "   for(int i = 0; i < sc; i++) for(int j = 0; j < sc; j++) {"
                 "       vec2 pos = v_position + vec2(j, i) / float(sc);"

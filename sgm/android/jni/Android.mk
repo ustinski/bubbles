@@ -4,7 +4,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE    := app
 LOCAL_CFLAGS    := -Wall -Wextra
-LOCAL_SRC_FILES := jni.c hook.cpp ../../../src/color.cpp ../../../src/matrix.cpp ../../../src/app.cpp ../../../src/texture.cpp ../../../src/vector.cpp ../../../src/background.cpp ../../../src/program.cpp
+LOCAL_SRC_FILES := jni.c hook.cpp ../../../src/app.cpp ../../../src/texture.cpp ../../../src/vector.cpp ../../../src/bubble.cpp ../../../src/background.cpp ../../../src/program.cpp
 LOCAL_LDLIBS := -lGLESv2
 
 include $(BUILD_SHARED_LIBRARY)

@@ -4,7 +4,10 @@
 namespace App
 {
     void init(int width, int height);
-    void tick(unsigned int dt);
+    void update(int dt);
+    void pointerDown(int id, int x, int y);
+    void pointerUp(int id, int x, int y);
+    void pointerMove(int id, int x, int y);
     void close();
 }
 
