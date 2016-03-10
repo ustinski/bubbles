@@ -3,8 +3,8 @@
 
 #include <time.h>
 
-unsigned int _time;
-bool _init = true;
+int _time;
+bool hook_init = true;
 
 int _get_time()
 {
@@ -15,11 +15,11 @@ int _get_time()
 
 void hook_surface_changed(int width, int height)
 {
-    if (_init) {
-        _init = false;
+    if (hook_init) {
+        hook_init = false;
         App::init(width, height);
     } else {
-        App::resume();
+//         App::resume();
     }
 //     App::initGL();
     _time = _get_time();

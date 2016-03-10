@@ -61,10 +61,10 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onPause() {
+        JNIWrapper.onPause();
         super.onPause();
         if (rendererSet) {
             glSurfaceView.onPause();
-            JNIWrapper.onPause();
         }
     }
 
