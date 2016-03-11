@@ -1,6 +1,7 @@
 [android]
 name: bubbles-android
 package: com.example.bubbles
+orientation: portrait
 
 [x11]
 name: bubbles-x11

@@ -1,7 +1,7 @@
 #ifndef PROGRAM_H
 #define PROGRAM_H
 
-#include <GLES2/gl2.h>
+#include "gles.h"
 
 #include <string>
 #include <vector>

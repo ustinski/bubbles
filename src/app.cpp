@@ -4,7 +4,7 @@
 
 #include "../sgm/app.h"
 
-#include <GLES2/gl2.h>
+#include "gles.h"
 
 namespace App
 {
@@ -24,10 +24,10 @@ void App::init(int width, int height)
     static bool a = false;
     if(a) return;
     else a = true;
-    
+
     _width = width;
     _height = height;
-    
+
     initGL();
 
     _background = new Background;

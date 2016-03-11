@@ -14,4 +14,8 @@ public class JNIWrapper {
     public static native void onPointerUp(int id, int x, int y);
 
     public static native void onPointerMove(int id, int x, int y);
+
+    public static native void onPause();
+
+    public static native void onResume();
 }

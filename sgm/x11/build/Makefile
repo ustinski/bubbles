@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := all
 
-TARGET= bubbles
+TARGET= app
 SRC_DIR= ../../../src
 X11_SRC_DIR= ../src
 
@@ -20,15 +20,8 @@ main.o: $(X11_SRC_DIR)/main.cpp
 x11.o: $(X11_SRC_DIR)/x11.cpp
 	$(CXX) -c $(CXXFLAGS) $(X11_SRC_DIR)/x11.cpp
 
-
-
 all: $(OBJECTS)
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS)
-	
+
 clean:
 	rm $(OBJECTS) $(TARGET)
-
-
-
-
-

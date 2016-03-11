@@ -1,7 +1,7 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
-#include <GLES2/gl2.h>
+#include "gles.h"
 
 class Vector
 {

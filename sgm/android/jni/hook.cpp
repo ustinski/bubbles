@@ -5,11 +5,11 @@
 
 unsigned int _time;
 
-unsigned int _get_time()
+int _get_time()
 {
   struct timeval  now;
   gettimeofday(&now, NULL);
-  return (unsigned int)(now.tv_sec * 1000 + now.tv_usec / 1000);
+  return (int)(now.tv_sec * 1000 + now.tv_usec / 1000);
 }
 
 void hook_surface_changed(int width, int height)
@@ -20,10 +20,20 @@ void hook_surface_changed(int width, int height)
 
 void hook_draw_frame()
 {
-    unsigned int time = _get_time();
-    unsigned int dt = time - _time;
+    int time = _get_time();
+    int dt = time - _time;
     _time = time;
     App::update(dt);
+}
+
+void hook_pause()
+{
+
+}
+
+void hook_resume()
+{
+    _time = _get_time();
 }
 
 void hook_pointer_down(int id, int x, int y)
