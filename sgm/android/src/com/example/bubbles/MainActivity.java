@@ -1,13 +1,9 @@
 package com.example.bubbles;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.content.Context;
-import android.content.pm.ConfigurationInfo;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.os.Bundle;
-import android.widget.Toast;
 import android.view.View;
 import android.view.MotionEvent;
 
@@ -77,7 +73,6 @@ public class MainActivity extends Activity {
         super.onResume();
         if (rendererSet) {
             glSurfaceView.onResume();
-            JNIWrapper.onResume();
         }
     }
 }

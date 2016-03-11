@@ -4,6 +4,7 @@
 #include <time.h>
 
 unsigned int _time;
+bool _init = true;
 
 int _get_time()
 {
@@ -14,8 +15,19 @@ int _get_time()
 
 void hook_surface_changed(int width, int height)
 {
-    App::init(width, height);
+    if (_init) {
+        _init = false;
+        App::init(width, height);
+    } else {
+        App::resume();
+    }
+//     App::initGL();
     _time = _get_time();
+}
+
+void hook_pause()
+{
+//     App::pause();
 }
 
 void hook_draw_frame()
@@ -24,16 +36,6 @@ void hook_draw_frame()
     int dt = time - _time;
     _time = time;
     App::update(dt);
-}
-
-void hook_pause()
-{
-
-}
-
-void hook_resume()
-{
-    _time = _get_time();
 }
 
 void hook_pointer_down(int id, int x, int y)

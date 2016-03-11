@@ -21,12 +21,6 @@ JNIEXPORT void JNICALL Java_com_example_bubbles_JNIWrapper_onPause(JNIEnv * env,
     hook_pause();
 }
 
-JNIEXPORT void JNICALL Java_com_example_bubbles_JNIWrapper_onResume(JNIEnv * env, jclass cls) {
-    JNI_UNUSED(env);
-    JNI_UNUSED(cls);
-    hook_resume();
-}
-
 JNIEXPORT void JNICALL Java_com_example_bubbles_JNIWrapper_onPointerDown(JNIEnv * env, jclass cls, jint id, jint x, jint y) {
     JNI_UNUSED(env);
     JNI_UNUSED(cls);
