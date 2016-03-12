@@ -1,6 +1,7 @@
 #include "bubble.h"
 #include "app.h"
 #include "background.h"
+#include "bubblecontainer.h"
 
 #include <iostream>
 #include <sstream>
@@ -9,20 +10,11 @@
 
 using namespace std;
 
-const int refractionScale = 2;
-
-Program *Bubble::program;
-
-void Bubble::initCommon()
-{
-    createProgram();
-    createBackgroundTexture();
-}
-
-Bubble::Bubble(GLfloat r)
+Bubble::Bubble(GLfloat r, Vector position)
 {
     _r = r;
-    const int speed = 150;
+    _position = position;
+    const int speed = 500;
     _speed.setValues(rand() % speed - speed / 2, rand() % speed - speed / 2);
 
     vertexData = new GLfloat[12] {
@@ -34,93 +26,14 @@ Bubble::Bubble(GLfloat r)
             -r, -r
     };
 
-
-
-
     createRefractionMap();
     createOutline();
-}
-
-void Bubble::createProgram()
-{
-    program = new Program;
-    stringstream vertex;
-    vertex <<   "#version 100 \n"
-                "precision mediump float;"
-                ""
-                "uniform vec2 u_position;"
-                ""
-                "attribute vec2 a_position;"
-                ""
-                "varying vec2 v_position;"
-                ""
-                "void main()"
-                "{"
-                "   v_position = a_position;"
-                ""
-                "   gl_Position = vec4((u_position + a_position) * 2.0 / vec2(" << App::width() << ", " << App::height() << "), 0, 1);"
-                "}";
-    stringstream fragment;
-    fragment << "#version 100 \n"
-                "precision mediump float;"
-                ""
-                "uniform vec2 u_position;"
-                "uniform sampler2D u_background;"
-                "uniform sampler2D u_refraction_map;"
-                "uniform float u_radius;"
-                "uniform sampler2D u_outline;"
-                ""
-                "varying vec2 v_position;"
-                ""
-                "vec4 draw_refraction(vec2 pos)"
-                "{"
-                "   return texture2D(u_refraction_map, pos / 2.0 / u_radius + vec2(0.5));"
-                "}"
-                ""
-                "vec4 draw_outline()"
-                "{"
-                "   return texture2D(u_outline, v_position / 2.0 / u_radius + vec2(0.5));"
-                "}"
-                ""
-                "void main()"
-                "{"
-                "   if(draw_refraction(v_position).a == 0.0) {"
-                "       gl_FragColor = draw_outline();"
-                "       return;"
-                "   }"
-                ""
-                "   float n = 1.8;"
-                "   int sc = " << refractionScale << ";"
-                ""
-                "   vec4 refracted_background = vec4(0);"
-                "   for(int i = 0; i < sc; i++) for(int j = 0; j < sc; j++) {"
-                "       vec2 pos = v_position + vec2(j, i) / float(sc);"
-                "       float k_from_map = draw_refraction(pos).r;"
-                "       float k = ((n - 1.0) * k_from_map + 1.0) / n;"
-                "       vec2 texcoord = (pos * k + u_position) / " << App::background().textureSize() << ".0 + vec2(0.5);"
-                "       refracted_background += texture2D(u_background, texcoord);"
-                "   }"
-                ""
-                "   refracted_background /= float(sc * sc);"
-                "   vec4 outline = draw_outline();"
-                ""
-                "   gl_FragColor = vec4(refracted_background.rgb * (1.0 - outline.a) + outline.rgb * outline.a, 1.0);"
-                "}";
-    program->setShaders(vertex, fragment);
-
-    program->addAttribute("a_position", 2, 2, 0);
-}
-
-void Bubble::createBackgroundTexture()
-{
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, App::background().texture().index);
-    glUniform1i(glGetUniformLocation(program->index(), "u_background"), 0);
+    createPhysics();
 }
 
 void Bubble::createRefractionMap()
 {
-    const int r_sc = _r * refractionScale;
+    const int r_sc = _r * BubbleContainer::refractionScale();
     const int imageWidth = r_sc * 2;
     unsigned char *pixels = new unsigned char[imageWidth * imageWidth * 4];
     for(int i = 0; i < imageWidth; i++) for(int j = 0; j < imageWidth; j++) {
@@ -148,7 +61,7 @@ void Bubble::createRefractionMap()
         for(int l = 0; l < 3; l++) p[l] = k;
         p[3] = 255;
     }
-    refractionMap = new Texture(1, program, "u_refraction_map", imageWidth, imageWidth, pixels);
+    refractionMap = new Texture(1, BubbleContainer::program(), "u_refraction_map", imageWidth, imageWidth, pixels);
 }
 
 void Bubble::createOutline()
@@ -171,29 +84,52 @@ void Bubble::createOutline()
         p[3] = alpha / 4;
     }
 
-    outline = new Texture(2, program, "u_outline", imageWidth, imageWidth, pixels);
+    outline = new Texture(2, BubbleContainer::program(), "u_outline", imageWidth, imageWidth, pixels);
+}
+
+void Bubble::createPhysics()
+{
+    b2BodyDef bodyDef;
+    bodyDef.position.Set(_position.x() / App::scale(), _position.y() / App::scale());
+    bodyDef.linearVelocity.Set(_speed.x() / App::scale(), _speed.y() / App::scale());
+    bodyDef.type = b2_dynamicBody;
+    _body = App::world()->CreateBody(&bodyDef);
+
+    b2FixtureDef fixtureDef;
+    {
+        b2CircleShape *circleShape = new b2CircleShape;
+        circleShape->m_p.Set(0, 0);
+        circleShape->m_radius = _r / App::scale();
+        fixtureDef.shape = circleShape;
+    }
+
+    fixtureDef.density = 1;
+    fixtureDef.friction = 0;
+    fixtureDef.restitution = 1;
+
+    _body->CreateFixture(&fixtureDef);
 }
 
 void Bubble::draw()
 {
-    program->use();
-    program->enableAttributes(vertexData);
+    BubbleContainer::program()->use();
+    BubbleContainer::program()->enableAttributes(vertexData);
 
-    glUniform2fv(glGetUniformLocation(program->index(), "u_position"), 1, _position.data());
-    glUniform1i(glGetUniformLocation(program->index(), "u_background"), 0);
+    glUniform2fv(glGetUniformLocation(BubbleContainer::program()->index(), "u_position"), 1, _position.data());
+    glUniform1i(glGetUniformLocation(BubbleContainer::program()->index(), "u_background"), 0);
 
     refractionMap->bind();
-    glUniform1i(glGetUniformLocation(program->index(), "u_refraction_map"), 1);
+    glUniform1i(glGetUniformLocation(BubbleContainer::program()->index(), "u_refraction_map"), 1);
 
-    glUniform1fv(glGetUniformLocation(program->index(), "u_radius"), 1, &_r);
+    glUniform1fv(glGetUniformLocation(BubbleContainer::program()->index(), "u_radius"), 1, &_r);
 
     outline->bind();
-    glUniform1i(glGetUniformLocation(program->index(), "u_outline"), 2);
+    glUniform1i(glGetUniformLocation(BubbleContainer::program()->index(), "u_outline"), 2);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void Bubble::update(int dt)
+void Bubble::update()
 {
-    _position += _speed * (double(dt) / 1000);
+    _position = App::scale() * _body->GetPosition();
 }

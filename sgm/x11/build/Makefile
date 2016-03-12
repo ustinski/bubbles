@@ -5,10 +5,9 @@ SRC_DIR= ../../../src
 X11_SRC_DIR= ../src
 
 CXX= g++
-CXXFLAGS= -O2 -pipe
-INCPATH= $(SRC_DIR)
+CXXFLAGS= -O2 -pipe -I$(SRC_DIR)
 LINK= g++
-LFLAGS= -lX11 -lGLESv2 -lEGL
+LFLAGS= -lX11 -lGLESv2 -lEGL 
 
 include Objects.mk
 

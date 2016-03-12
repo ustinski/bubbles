@@ -1,20 +1,22 @@
 #include "app.h"
 #include "background.h"
-#include "bubble.h"
+#include "bubblecontainer.h"
 
 #include "../sgm/app.h"
 
 #include "gles.h"
+
+#include <Box2D/Box2D.h>
 
 namespace App
 {
     int _width;
     int _height;
 
-    Background *_background;
-    Bubble *bubble;
-    Bubble *b1;
+    b2World *_world;
+    const double _scale = 10;
 
+    Background *_background;
 
     void initGL();
 }
@@ -30,11 +32,19 @@ void App::init(int width, int height)
 
     initGL();
 
-    _background = new Background;
-     Bubble::initCommon();
-     b1 = new Bubble(100);
-     bubble = new Bubble(120);
+    _world = new b2World(b2Vec2(0, 0));
 
+    _background = new Background;
+    BubbleContainer::init();
+
+    BubbleContainer::add();
+    BubbleContainer::add();
+    BubbleContainer::add();
+    BubbleContainer::add();
+    BubbleContainer::add();
+    BubbleContainer::add();
+    BubbleContainer::add();
+    BubbleContainer::add();
 }
 
 void App::initGL()
@@ -51,13 +61,13 @@ void App::update(int dt)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     _background->draw();
-     bubble->draw();
-     b1->draw();
+    BubbleContainer::draw();
 
 
-    _background->update(15);
-    bubble->update(15);
-    b1->update(15);
+    _world->Step(double(dt) / 1000, 6, 2);
+
+    _background->update(dt);
+    BubbleContainer::update();
 }
 
 void App::close()
@@ -72,6 +82,16 @@ int App::width()
 int App::height()
 {
     return _height;
+}
+
+b2World *App::world()
+{
+    return _world;
+}
+
+double App::scale()
+{
+    return _scale;
 }
 
 const Background &App::background()

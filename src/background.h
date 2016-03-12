@@ -37,12 +37,10 @@ public:
     void update(int dt);
 
     Texture texture() const;
-    int textureSize() const;
 
 private:
     GLfloat *vertexData;
     Texture *_texture;
-    const int _textureSize;
     Program program;
 
     ColorContainer colors;
@@ -54,6 +52,8 @@ private:
     void initColors();
     void createTexture();
         void fill(const ColorPair &pair);
+    void createPhysics();
+        void createBox(int x, int y, int hWidth, int hHeight);
 };
 
 #endif // BACKGROUND_H

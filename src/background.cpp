@@ -4,15 +4,17 @@
 #include <iostream>
 #include <sstream>
 
+#include <Box2D/Box2D.h>
+
 using namespace std;
+using namespace App;
 
 Background::Background()
-    : _textureSize(64)
-    , time(0)
+    : time(0)
     , changeColor(false)
 {
-    GLfloat w = App::width() / 2;
-    GLfloat h = App::height() / 2;
+    GLfloat w = width() / 2;
+    GLfloat h = height() / 2;
 
     vertexData = new GLfloat[12] {
         -w, -h,
@@ -26,6 +28,7 @@ Background::Background()
     createProgram();
     initColors();
     createTexture();
+    createPhysics();
 }
 
 void Background::createProgram()
@@ -40,7 +43,7 @@ void Background::createProgram()
                 "void main()"
                 "{"
                 ""
-                "    gl_Position = vec4(a_position * 2.0 / vec2(" << App::width() << ", " << App::height() << "), 0, 1);"
+                "    gl_Position = vec4(a_position * 2.0 / vec2(" << width() << ", " << height() << "), 0, 1);"
                 ""
                 "    v_position = a_position;"
                 "}";
@@ -53,7 +56,7 @@ void Background::createProgram()
                 ""
                 "void main()"
                 "{"
-                "    gl_FragColor = texture2D(u_background, v_position / " << _textureSize << ".0 + vec2(0.5));"
+                "    gl_FragColor = texture2D(u_background, v_position / vec2(" << width() << ", " << height() << ") + vec2(0.5));"
                 "}";
     program.setShaders(vertex, fragment);
 
@@ -76,27 +79,51 @@ void Background::initColors()
 
 void Background::createTexture()
 {
-    unsigned char *pixels = new unsigned char[_textureSize * _textureSize * 4];
-    for(int i = 0; i < _textureSize; i++) for(int j = 0; j < _textureSize; j++)
-            pixels[(_textureSize * i + j) * 4 + 3] = 255;
-    _texture = new Texture(0, &program, "u_background", _textureSize, _textureSize, pixels);
+    unsigned char *pixels = new unsigned char[height() * width() * 4];
+    for(int i = 0; i < height(); i++) for(int j = 0; j < width(); j++)
+            pixels[(width() * i + j) * 4 + 3] = 255;
+    _texture = new Texture(0, &program, "u_background", width(), height(), pixels);
     fill(colors.current());
 }
 
 void Background::fill(const ColorPair &pair)
 {
-    for(int i = 0; i < _textureSize; i++) {
-        const int lineSize = 32;
-        const Color &c = i % _textureSize >= _textureSize / 2 ? pair.a : pair.b;
-        for(int j = 0; j < _textureSize; j++) {
-            unsigned char *p = &_texture->pixels[(_textureSize * i + j) * 4];
+        const double scale = 0.05;
+        const int max = height() > width() ? height() : width();
+        const int lineSize = max * scale;
+    for(int i = 0; i < height(); i++) {
+        const Color &c = i % (lineSize * 2) >= lineSize ? pair.a : pair.b;
+        for(int j = 0; j < width(); j++) {
+            unsigned char *p = &_texture->pixels[(width() * i + j) * 4];
             p[0] = c.r;
             p[1] = c.g;
             p[2] = c.b;
         }
     }
     glBindTexture(GL_TEXTURE_2D, _texture->index);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _textureSize, _textureSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, _texture->pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width(), height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, _texture->pixels);
+}
+
+void Background::createPhysics()
+{
+        const int hw = 10;
+        const double sc = scale();
+    createBox(0, height() / 2 / sc + hw, width() / 2 / sc, hw);
+    createBox(0, -height() / 2 / sc - hw, width() / 2 / sc, hw);
+    createBox(-width() / 2 / sc - hw, 0, hw, height() / 2 / sc);
+    createBox(width() / 2 / sc + hw, 0, hw, height() / 2 / sc);
+}
+
+void Background::createBox(int x, int y, int hWidth, int hHeight)
+{
+    b2BodyDef bodyDef;
+    bodyDef.position.Set(x, y);
+
+    b2PolygonShape box;
+    box.SetAsBox(hWidth, hHeight);
+
+    b2Body *body = world()->CreateBody(&bodyDef);
+    body->CreateFixture(&box, 0);
 }
 
 void Background::draw()
@@ -148,9 +175,4 @@ void Background::update(int dt)
 Texture Background::texture() const
 {
     return *_texture;
-}
-
-int Background::textureSize() const
-{
-    return _textureSize;
 }

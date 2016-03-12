@@ -1,19 +1,22 @@
 #ifndef BUBBLE_H
 #define BUBBLE_H
 
-#include "program.h"
+
 #include "texture.h"
 #include "vector.h"
+
+#include <vector>
 
 class Bubble
 {
 public:
-    static void initCommon();
+    Bubble(GLfloat r, Vector position);
 
-    Bubble(GLfloat r);
+    Vector position() { return _position; }
+    GLfloat radius() { return _r; }
 
     void draw();
-    void update(int dt);
+    void update();
 
 private:
     GLfloat _r;
@@ -23,12 +26,13 @@ private:
     GLfloat *vertexData;
     Texture *refractionMap;
     Texture *outline;
-    static Program *program;
 
-    static void createProgram();
-    static void createBackgroundTexture();
+    b2Body *_body;
+
+
     void createRefractionMap();
     void createOutline();
+    void createPhysics();
 };
 
 #endif // BUBBLE_H

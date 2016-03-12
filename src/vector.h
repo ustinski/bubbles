@@ -3,6 +3,8 @@
 
 #include "gles.h"
 
+#include <Box2D/Box2D.h>
+
 class Vector
 {
 public:
@@ -18,9 +20,11 @@ public:
 
     void operator +=(const Vector &vector);
     void operator -=(const Vector &vector);
+    friend Vector operator -(Vector a, Vector b);
     friend Vector operator /(const Vector &vector, float number);
     friend Vector operator *(const Vector &vector, float number);
     void operator =(const Vector &vector);
+    void operator =(b2Vec2 vector);
 
 private:
     GLfloat coord[2];

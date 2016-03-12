@@ -34,6 +34,11 @@ void Vector::operator -=(const Vector &vector)
     coord[1] -= vector.y();
 }
 
+Vector operator -(Vector a, Vector b)
+{
+    return Vector(a.x() - b.x(), a.y() - b.y());
+}
+
 Vector operator /(const Vector &vector, float number)
 {
     return Vector(vector.x() / number, vector.y() / number);
@@ -47,6 +52,11 @@ Vector operator *(const Vector &vector, float number)
 void Vector::operator =(const Vector &vector)
 {
     setValues(vector.x(), vector.y());
+}
+
+void Vector::operator =(b2Vec2 vector)
+{
+    setValues(vector.x, vector.y);
 }
 
 GLfloat Vector::x() const
